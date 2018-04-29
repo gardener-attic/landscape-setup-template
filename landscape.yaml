@@ -21,14 +21,14 @@
 
 
 cloud:
-  # currently only AWS supported, other cloud providers will follow
+  # currently only AWS is supported, other cloud providers will follow
   # for this setup (Azure, GCP, OpenStack, ...)
   variant: aws
 
 authentication:
   # for gardener installation on AWS
   variant_aws:
-    # You need an AWS access key with sufficient permissions to create a 
+    # You need an AWS access key which has sufficient permissions to create a
     # VPC, subnets, routing tables, VMs, etc.
     aws_access_key: &aws_access_key "<access key>"
     aws_secret_key: &aws_secret_key "<secret key>"
@@ -41,8 +41,8 @@ authentication:
 # Settinhs required for Kubernetes cluster setup with Kubify
 # ---------------------------------------------------------------------------
 
-# You should leave the following parameters untouched unless your planning
-# to use later versions
+# You should leave the following parameters untouched unless you are planning
+# to use newer versions
 versions:
   variant_all:
     kubernetes_version: v1.9.6
@@ -131,7 +131,7 @@ misc:
     event_ttl: 730h0m0s
 
 # ---------------------------------------------------------------------------
-# Charts for gardener, dasboard, and identity deployments
+# Helm charts for gardener, dasboard, and identity deployments
 # ---------------------------------------------------------------------------
 
 charts:
@@ -168,8 +168,8 @@ charts:
   values:
   # You need to set at least one password here to be able to 
   # log on. You can either provide the password in clear text 
-  # in the password key or provide bcrypted passsword in
-  # the hash key. Bcrypted password can be created with
+  # in the "password" key or provide bcrypted passsword in
+  # the "hash" key. Bcrypted password can be created with
   # htpasswd -bnBC 10 "" password | tr -d ':\n' | sed 's/$2y/$2a/'
   staticPasswords:
   # sample
@@ -182,7 +182,7 @@ charts:
   email: "<email address>"
 
 seed_config:
-  # see cluster created by Kubify is registered as the seed cluster
+  # The cluster created by Kubify is registered as the seed cluster,
   # use the same region here as in authentication.variant_aws.aws_region
   region: eu-west-1
   # This is a Container Linux image. Note that ami ids differ between 
