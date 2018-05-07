@@ -5,7 +5,7 @@
 	path = gardener
 	url = https://github.com/gardener/gardener
 [submodule "kubify"]
-	path = kubify
+	path = k8s
 	url = https://github.com/gardener/kubify
 [submodule "setup"]
 	path = setup
