@@ -38,7 +38,7 @@ authentication:
     aws_availability_zone: b
 
 # ---------------------------------------------------------------------------
-# Settinhs required for Kubernetes cluster setup with Kubify
+# Settings required for Kubernetes cluster setup with Kubify
 # ---------------------------------------------------------------------------
 
 # You should leave the following parameters untouched unless you are planning
