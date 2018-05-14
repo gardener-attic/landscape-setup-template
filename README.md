@@ -54,6 +54,60 @@ file that you need to modify - all other configuration files will be
 derived from this one. Make sure to follow the instructions in the landscape
 file.
 
+## Steps 3-10 (automated)
+
+Steps 3 to 10 are (partly) automated. This section will guide you through the process using the automation scripts. The guide for the manual installation can be found below.
+
+### Step 3: Docker Container
+```
+./docker_build.sh
+```
+
+This script will build the container and name the image `gardener_landscape`. 
+
+Then run the container:
+
+```
+./docker_run.sh
+```
+
+After this,
+
+* you will be connected to the container via an interactive shell
+* the current folder will be mounted in that container
+* your current working directory will be that mounted folder
+* the environment variables will be configured (setup/init.sh is called)
+
+### Setup
+For the further installation, go into the `setup` folder: `cd setup`
+
+### Step 4: Create a Kubernetes Cluster via Kubify
+This step hasn't been automated yet. You can run the cluster setup from here, however, without changing folders:
+
+```
+./deploy_kubify.sh
+```
+
+You will have to confirm the cluster creation, see step 4 in the manual installation guide (below) for further details.
+
+Make sure that you wait long enough for the cluster to come up before continuing! This usually takes several minutes. You can check whether all nodes are running with `kubectl get pods --all-namespaces`.
+
+### Step 5-9: Gardener Setup
+```
+./deploy_gardener.sh
+```
+
+This script automates steps 5 to 9 and deploys the gardener and its dependencies on your cluster. 
+
+### Step 10: Apply Valid Certificates
+Step 10 has been simplified to the following command:
+
+```
+./deploy_certmanager.sh
+```
+
+Refer to the manual installation guide below for further information.
+
 ## Step 3: Build Docker Container
 
 The setup procedure has quite some dependencies on tools and in particular
