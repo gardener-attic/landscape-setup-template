@@ -82,7 +82,7 @@ After this,
 For the further installation, go into the `setup` folder: `cd setup`
 
 ### Step 4: Create a Kubernetes Cluster via Kubify
-This step hasn't been automated yet. You can run the cluster setup from here, however, without changing folders:
+This step hasn't been automated yet. You can use this script to run the cluster setup:
 
 ```
 ./deploy_kubify.sh
