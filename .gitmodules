@@ -9,4 +9,4 @@
 	url = https://github.com/gardener/kubify
 [submodule "setup"]
 	path = setup
-	url = https://github.com/gardener/landscape-setup
+	url = https://github.com/gardener/landscape-setup.git
