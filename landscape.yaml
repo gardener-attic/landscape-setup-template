@@ -48,6 +48,8 @@ versions:
     kubernetes_version: v1.9.6
   variant_aws:
     etcd_version: v3.1.8
+    # Alternative choice:
+    # image_name: "Flatcar-stable-1688.5.3"
     image_name: "CoreOS-stable-1576.5.0"
 
 clusters:
@@ -185,9 +187,13 @@ seed_config:
   # The cluster created by Kubify is registered as the seed cluster,
   # use the same region here as in authentication.variant_aws.aws_region
   region: eu-west-1
-  # This is a Container Linux image. Note that ami ids differ between 
-  # regions
+  # This is a Container Linux image.
+  # Note that ami ids differ between regions.
+  # Alternative choice:
+  # * Flatcar Linux 1688.5.3 eu-west-1 HVM:
+  #   image: ami-bfeac5c6
   image: ami-34237c4d
+
   # zones need to be adapted to the region
   zones:
   - eu-west-1a
