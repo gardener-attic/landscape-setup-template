@@ -38,7 +38,7 @@ authentication:
     aws_availability_zone: b
 
 # ---------------------------------------------------------------------------
-# Settinhs required for Kubernetes cluster setup with Kubify
+# Settings required for Kubernetes cluster setup with Kubify
 # ---------------------------------------------------------------------------
 
 # You should leave the following parameters untouched unless you are planning
@@ -94,7 +94,7 @@ misc:
     dashboard_creds: "<credentials here>"
     # you should not change anything in this section below except for the 
     # password
-    deploy_tiller: false
+    deploy_tiller: "false"
     oidc_issuer_subdomain: "identity.ingress"
     oidc_client_id: "kube-kubectl"
     oidc_username_claim: "email"
