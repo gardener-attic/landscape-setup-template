@@ -21,9 +21,10 @@
 
 
 cloud:
-  # currently only AWS is supported, other cloud providers will follow
-  # for this setup (Azure, GCP, OpenStack, ...)
-  variant: aws
+  # currently only AWS and Openstack are supported, other cloud providers will follow
+  # for this setup (Azure, GCP, ...)
+  # Use lower case!
+  variant: <cloud variant>
 
 authentication:
   # for gardener installation on AWS
@@ -36,6 +37,15 @@ authentication:
     aws_region: eu-west-1
     # Availability zone for the Kubify cluster
     aws_availability_zone: b
+  # for gardener installation on OpenStack
+  variant_openstack:
+    os_user_name: "<openstack username>"
+    os_password: "<openstack password>"
+    os_auth_url: "<openstack v3 api endpoint>"
+    os_tenant_name: "<tenant/project name>"
+    os_domain_name: "<domain name>"
+    os_region: "<region name>"
+    os_az: "<availability zone>"
 
 # ---------------------------------------------------------------------------
 # Settings required for Kubernetes cluster setup with Kubify
@@ -49,6 +59,8 @@ versions:
   variant_aws:
     etcd_version: v3.1.8
     image_name: "CoreOS-stable-1576.5.0"
+  variant_openstack:
+    image_name: "coreos-1688.5.3"
 
 clusters:
   # name of the cluster
@@ -128,6 +140,8 @@ misc:
               ]
         }
   variant_openstack:
+    os_fip_pool_name: "<floating ip pool name>"
+    os_lbaas_provider: "haproxy"
     event_ttl: 730h0m0s
 
 # ---------------------------------------------------------------------------
@@ -177,22 +191,40 @@ charts:
   #  password: "***************"
   #  username: "admin"
   #  userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+  connectors:
+  # Example for a GitHub connector below 
+  # You will need to configure your GitHub account accordingly
+  # see https://github.com/coreos/dex/blob/master/Documentation/connectors/github.md for further information on the GitHub connector
+  # and https://github.com/coreos/dex/tree/master/Documentation/connectors for more connectors
+#  - type: github
+#    id: github
+#    name: GitHub
+#    config:
+#      clientID: <github client id or environment variable containing it>
+#      clientSecret: <github client secret or environment variable containing it>
+      # redirectURI: <identity URL (with https!)>/callback
+      # identity is usually located at identity.ingress. + clusters.dns.domain_name
+#      redirectURI: <redirect URI>
+      # Only users which are members of at least one organization can authenticate
+#      orgs:
+#      - name: <name of github organization>
 - name: certmanager
   # Email address used for ACME registration
   email: "<email address>"
 
 seed_config:
   # The cluster created by Kubify is registered as the seed cluster,
-  # use the same region here as in authentication.variant_aws.aws_region
-  region: eu-west-1
-  # This is a Container Linux image. Note that ami ids differ between 
-  # regions
-  image: ami-34237c4d
+  # use the same region here as in the authentication node above
+  region: "<region name>"
+  # This is a Container Linux image. 
+  # AWS: Note that ami ids differ between regions
+  # Openstack: The available images depend on your openstack setup
+  image: "<image name>"
   # zones need to be adapted to the region
   zones:
-  - eu-west-1a
-  - eu-west-1b
-  - eu-west-1c
+  - <zone1>
+  - <zone2>
+  - <...>
   node_cidr: *subnet_cidr
   pod_cidr: *pod_cidr
   service_cidr: *service_cidr
