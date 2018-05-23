@@ -58,6 +58,8 @@ file.
 
 Steps 3 to 10 are (partly) automated. This section will guide you through the process using the automation scripts. The guide for the manual installation can be found below.
 
+First, you need to change into the setup folder: `cd setup`
+
 ### Step 3: Docker Container
 ```
 ./docker_build.sh
@@ -74,12 +76,11 @@ Then run the container:
 After this,
 
 * you will be connected to the container via an interactive shell
-* the current folder will be mounted in that container
+* the landscape folder will be mounted in that container
 * your current working directory will be that mounted folder
-* the environment variables will be configured (setup/init.sh is called)
-
-### Setup
-For the further installation, go into the `setup` folder: `cd setup`
+* setup/init.sh is sourced, meaning
+  * the environment variables will be set
+  * kubectl will be configured to communicate with your cluster
 
 ### Step 4: Create a Kubernetes Cluster via Kubify
 This step hasn't been automated yet. You can use this script to run the cluster setup:
@@ -345,11 +346,8 @@ While lowering the entry barrier for getting started with Gardener quite
 significantly you will notice that it is far from simple.
 
 Gardener currently supports AWS, Azure, GCP, and OpenStack but this
-project only contains configurations and scripts for AWS. We are looking for
+project only contains configurations and scripts for AWS and Openstack. We are looking for
 help to extend the installation procedure to other cloud providers.
 
 Gardener has quite a lot of nice features such as update operations and
 resilience features that we have not configured here but that really should be turned on.
-
-We haven't configured an identity provider for [dex](https://github.com/coreos/dex).
-This should be straightforward to do.
