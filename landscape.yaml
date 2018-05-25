@@ -213,18 +213,30 @@ charts:
   email: "<email address>"
 
 seed_config:
-  # The cluster created by Kubify is registered as the seed cluster,
-  # use the same region here as in the authentication node above
-  region: "<region name>"
-  # This is a Container Linux image. 
-  # AWS: Note that ami ids differ between regions
-  # Openstack: The available images depend on your openstack setup
-  image: "<image name>"
-  # zones need to be adapted to the region
-  zones:
-  - <zone1>
-  - <zone2>
-  - <...>
-  node_cidr: *subnet_cidr
-  pod_cidr: *pod_cidr
-  service_cidr: *service_cidr
+  variant_aws:
+    # The cluster created by Kubify is registered as the seed cluster,
+    # use the same region here as in the authentication node above
+    region: "eu-west-1"
+    # This is a Container Linux image. 
+    # Note that ami ids differ between regions
+    image: "ami-34237c4d"
+    zones:
+    - eu-west-1a
+    - eu-west-1b
+    - eu-west-1c
+  variant_openstack:
+    # The cluster created by Kubify is registered as the seed cluster,
+    # use the same region here as in the authentication node above
+    region: "<region name>"
+    # This is a Container Linux image. 
+    # The available images depend on your openstack setup
+    image: "<image name>"
+    # zones need to be adapted to the region
+    zones:
+    - <zone1>
+    - <zone2>
+    - <...>
+  variant_all:
+    node_cidr: *subnet_cidr
+    pod_cidr: *pod_cidr
+    service_cidr: *service_cidr
