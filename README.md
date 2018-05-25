@@ -89,9 +89,11 @@ This step hasn't been automated yet. You can use this script to run the cluster 
 ./deploy_kubify.sh
 ```
 
-You will have to confirm the cluster creation, see step 4 in the manual installation guide (below) for further details.
+As opposed to the manual setup, you won't have to confirm the cluster creation, so double-check your landscape.yaml.
 
-Make sure that you wait long enough for the cluster to come up before continuing! This usually takes several minutes. You can check whether all nodes are running with `kubectl get pods --all-namespaces`.
+The script will wait some time for the cluster to come up and then partly validate that the cluster is ready. 
+
+If you get errors during the cluster setup, just try to run the script again.
 
 ### Step 5-9: Gardener Setup
 ```
