@@ -83,7 +83,7 @@ After this,
   * kubectl will be configured to communicate with your cluster
 
 ### Step 4: Create a Kubernetes Cluster via Kubify
-This step hasn't been automated yet. You can use this script to run the cluster setup:
+Switch to the setup folder again: `cd setup`. You can then use this script to run the cluster setup:
 
 ```
 ./deploy_kubify.sh
