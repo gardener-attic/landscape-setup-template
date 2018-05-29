@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This file contains parameters for setting up a minimal Gardener 
-# environment. Follow the instructions in the file to configure an 
+# This file contains parameters for setting up a minimal Gardener
+# environment. Follow the instructions in the file to configure an
 # installation
 
-# Note: the purpose of this project is to provide a simple setup of the 
+# Note: the purpose of this project is to provide a simple setup of the
 #       Gardener environment. It is not meant for productive environments
 
 
@@ -77,7 +77,7 @@ clusters:
     access_key: &hzone_access_key "<access key for hosted zone>"
     secret_key: &hzone_secret_key "<secret key for hosted zone>"
   master:
-    # Properties for master nodes. 
+    # Properties for master nodes.
     count: 3
     volume_size: 50
   worker:
@@ -85,7 +85,7 @@ clusters:
     count: 3
     volume_size: 50
 
-etcd_backup: 
+etcd_backup:
   storage_type: s3
   region: eu-west-1
 
@@ -94,17 +94,17 @@ addons:
   variant_all:
     heapster: {}
     nginx-ingress: {}
-    dashboard: 
+    dashboard:
       app_name: "kubernetes-dashboard"
-  variant_aws: 
+  variant_aws:
   variant_openstack:
 
-misc: 
+misc:
   variant_all:
     # use htpasswd to create password entries
     # example here: admin: ********* (htpasswd -bn admin "chosen password")
     dashboard_creds: "<credentials here>"
-    # you should not change anything in this section below except for the 
+    # you should not change anything in this section below except for the
     # password
     deploy_tiller: "false"
     oidc_issuer_subdomain: "identity.ingress"
@@ -117,9 +117,9 @@ misc:
     pod_cidr: &pod_cidr "10.241.128.0/17"
     vpc_cidr: "10.251.0.0/16"
   variant_aws:
-    aws_kube2iam_roles: 
+    aws_kube2iam_roles:
     - name: example
-      description: "Allow access to ECR repositories beginning with 'example/', and creation of new repositories"      
+      description: "Allow access to ECR repositories beginning with 'example/', and creation of new repositories"
       policy: |
         {
               "Version": "2012-10-17",
@@ -152,20 +152,31 @@ charts:
 - name: gardener
   repository: https://github.com/gardener/gardener
   path: charts/gardener
-  tag: 0.3.1
+  tag: 0.4.0
+  # This is the DH value for the VPN. You can generate a new one using this
+  # command: "openssl dhparam -out dh2048.pem 2048"
+  openVPNDiffieHellmanKey: |
+    -----BEGIN DH PARAMETERS-----
+    MIIBCAKCAQEAuuD7hZeeAUzs+bWFcdS6fM/F8xOyLn1vrNQ+I/zoLh8maehADhHr
+    yJsW0nF3mgDFYx18/6sqd3jKrwW+O6Gg48X/AzEm2O1TBnMgH+CgZ/C5HzouWUtu
+    UiUnqy0GaFv7oxbeQBv0Y5mP7k7ey5nuIhuRXJkH1j3PKopWD52AOE620ndLsZuz
+    DxszvaCZLo85qb6lm75+XSL2i3gXaw1Dv78ogdrOrggwqAUM6OG7d1B4eTC7aGj+
+    I32AbPZ8+IIZCDUKL+bqXIg2TieT+sDMUQSJPlAcur+UmNf5Sss67NM0d/uclaOU
+    OEdYnniH3kneQZH/zy0hwiRES9W2Ws3RkwIBAg==
+    -----END DH PARAMETERS-----
   values:
     controller:
       internalDomain:
-        # the cluster internal domain, this should be set to 
-        # "internal." + clusters.dns.domain_name 
+        # the cluster internal domain, this should be set to
+        # "internal." + clusters.dns.domain_name
         domain: "<internal domain>"
         provider: aws-route53
         hostedZoneID: *hzone
         access_key: *hzone_access_key
         secret_key: *hzone_secret_key
       defaultDomains:
-        # the cluster internal domain, this should be set to 
-        # "shoot." + clusters.dns.domain_name 
+        # the cluster internal domain, this should be set to
+        # "shoot." + clusters.dns.domain_name
       - domain: "<shoot domain>"
         provider: aws-route53
         hostedZoneID: *hzone
@@ -174,14 +185,14 @@ charts:
 - name: dashboard
   repository: https://github.com/gardener/dashboard
   path: charts/gardener-dashboard
-  tag: 1.7.0
+  tag: 1.10.0
 - name: identity
   repository: https://github.com/gardener/dashboard
   path: charts/identity
   tag: v2.10.0
   values:
-  # You need to set at least one password here to be able to 
-  # log on. You can either provide the password in clear text 
+  # You need to set at least one password here to be able to
+  # log on. You can either provide the password in clear text
   # in the "password" key or provide bcrypted passsword in
   # the "hash" key. Bcrypted password can be created with
   # htpasswd -bnBC 10 "" password | tr -d ':\n' | sed 's/$2y/$2a/'
@@ -192,7 +203,7 @@ charts:
   #  username: "admin"
   #  userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
   connectors:
-  # Example for a GitHub connector below 
+  # Example for a GitHub connector below
   # You will need to configure your GitHub account accordingly
   # see https://github.com/coreos/dex/blob/master/Documentation/connectors/github.md for further information on the GitHub connector
   # and https://github.com/coreos/dex/tree/master/Documentation/connectors for more connectors
@@ -217,7 +228,7 @@ seed_config:
     # The cluster created by Kubify is registered as the seed cluster,
     # use the same region here as in the authentication node above
     region: "eu-west-1"
-    # This is a Container Linux image. 
+    # This is a Container Linux image.
     # Note that ami ids differ between regions
     image: "ami-34237c4d"
     zones:
@@ -228,7 +239,7 @@ seed_config:
     # The cluster created by Kubify is registered as the seed cluster,
     # use the same region here as in the authentication node above
     region: "<region name>"
-    # This is a Container Linux image. 
+    # This is a Container Linux image.
     # The available images depend on your openstack setup
     image: "<image name>"
     # zones need to be adapted to the region
