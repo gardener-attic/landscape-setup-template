@@ -32,7 +32,7 @@ git client and the Docker runtime installed.
 Follow these steps to install Gardener. Do not proceed to the next
 step in case of errors.
 
-## Step 1: Clone the Repositories and get dependencies
+## Step 1: Clone the Repositories and get Dependencies
 
 Get the `landscape-setup-template` from GitHub and initialize the
 submodules:
@@ -54,13 +54,10 @@ file that you need to modify - all other configuration files will be
 derived from this one. Make sure to follow the instructions in the landscape
 file.
 
-## Steps 3-10 (automated)
+## Step 3: Build and Run Docker Container
 
-Steps 3 to 10 are (partly) automated. This section will guide you through the process using the automation scripts. The guide for the manual installation can be found below.
+First, you need to change into the setup folder with `cd setup`
 
-First, you need to change into the setup folder: `cd setup`
-
-### Step 3: Docker Container
 ```
 ./docker_build.sh
 ```
@@ -77,101 +74,25 @@ After this,
 
 * you will be connected to the container via an interactive shell
 * the landscape folder will be mounted in that container
-* your current working directory will be that mounted folder
-* setup/init.sh is sourced, meaning
+* your current working directory will be `setup` folder
+* `setup/init.sh` is sourced, meaning
   * the environment variables will be set
   * kubectl will be configured to communicate with your cluster
 
-### Step 4: Create a Kubernetes Cluster via Kubify
-This step hasn't been automated yet. You can use this script to run the cluster setup:
+## Step 4: Create a Kubernetes Cluster via Kubify
+
+You can use this script to run the cluster setup:
 
 ```
 ./deploy_kubify.sh
 ```
 
-As opposed to the manual setup, you won't have to confirm the cluster creation, so double-check your landscape.yaml.
-
-The script will wait some time for the cluster to come up and then partly validate that the cluster is ready. 
+The script will wait some time for the cluster to come up and then partly
+validate that the cluster is ready.
 
 If you get errors during the cluster setup, just try to run the script again.
 
-### Step 5-9: Gardener Setup
-```
-./deploy_gardener.sh
-```
-
-This script automates steps 5 to 9 and deploys the gardener and its dependencies on your cluster. 
-
-### Step 10: Apply Valid Certificates
-Step 10 has been simplified to the following command:
-
-```
-./deploy_certmanager.sh
-```
-
-Refer to the manual installation guide below for further information.
-
-## Step 3: Build Docker Container
-
-The setup procedure has quite some dependencies on tools and in particular
-to specific versions of them. We therefore recommend to build a Docker
-container that comes with all tools with correct versions:
-
-```
-cd setup
-docker build .
-```
-
-Once built run the container and initialize the environment
-
-```
-docker run -it -v <local landcape directory>:/landscape <image id>  bash
-root@249ed6b5d440:/#
-root@249ed6b5d440:~# cd /landscape
-root@249ed6b5d440:/landscape# source setup/init.sh
-```
-
-## Step 4: Create a Kubernetes Cluster with Kubify
-
-Note: we currently use terraform 0.11.3. There was trouble with later
-versions so we do recommend that you stick to this version.
-
-For more in-depth information on Kubify read the documentation provided
-by the [Kubify project](https://github.com/gardener/kubify).
-
-```
-cd /landscape/setup/components
-./deploy.sh kubify
-```
-
-The script will run terraform but will ask for consent before it will start
-creating the cluster. You may want to check the 
-`/landscape/terraform.tfvars` file before continuing. Once you are satisfied
-enter `yes`.
-
-```
-Plan: 168 to add, 0 to change, 0 to destroy.
-
-Do you want to perform these actions?
-  Terraform will perform the actions described above.
-  Only 'yes' will be accepted to approve.
-
-  Enter a value: yes
-```
-
-Once completed you will see output similar to the following:
-
-```
-Apply complete! Resources: 168 added, 0 changed, 0 destroyed.
-
-Outputs:
-
-[...]
-```
-
-This means that all the resources have been created successfully but it will
-take a couple of minutes until your cluster is up and running. Check this,
-for example by making sure all pods are in status "running":
+Once completed the following command should show all deployed pods:
 
 ```
 root@c41327633d6d:/landscape# kubectl get pods --all-namespaces
@@ -182,32 +103,51 @@ kube-system     kube-apiserver-hcdnc                                            
 [...]
 ```
 
-## Step 5: Generate Certificates
+## Step 5-9: Gardener Setup (Automated)
+
+Steps 5-9 are automated. In case you need more control follow
+the instructions below for manually running them.
+
+```
+./deploy_gardener.sh
+```
+
+After successful completion go to step 10 (optional).
+
+## Step 5-9: Gardener Setup (Manual)
+
+The commands shown below need to be run from within the components 
+directory of the setup folder:
+
+```
+cd /landscape/setup/components
+```
+
+### Step 5: Generate Certificates
 
 These are the self-signed certificates used for the dashboard and
 identity ingresses (if you are on the internet you can later get
 letsencrypt issued certificates).
 
 ```
-root@2e8e080d2f34:/landscape# cd setup/components
-root@2e8e080d2f34:/landscape/setup/components# ./deploy.sh cert
+./deploy.sh cert
 ```
 
-## Step 6: Deploy tiller
+### Step 6: Deploy tiller
 
 Tiller is needed to deploy Helm charts in order to deploy Gardener and other needed components
 
 ```
-root@2e8e080d2f34:/landscape/setup/components# ./deploy.sh helm-tiller
+./deploy.sh helm-tiller
 ```
 
-## Step 7: Deploy Gardener
+### Step 7: Deploy Gardener
 
 Now we can deploy Gardener. If the previous steps were executed successfully
 this should be completed in a couple of seconds.
 
 ```
-root@2e8e080d2f34:/landscape/setup/components# ./deploy.sh gardener
+./deploy.sh gardener
 ```
 
 You might see a couple of messages like these:
@@ -221,7 +161,7 @@ when the deployment script finished you can verify the correct setup by
 running the following command:
 
 ```
-root@c41327633d6d:/landscape/setup/components# kubectl get shoots
+kubectl get shoots
 No resources found. 
 ```
 
@@ -229,13 +169,13 @@ As we do not have a seed cluster yet we cannot create any shoot clusters.
 The Gardener itself is installed in the `garden` namespace:
 
 ```
-root@c41327633d6d:/landscape/setup/components# kubectl get po -n garden
+kubectl get po -n garden
 NAME                                          READY     STATUS    RESTARTS   AGE
 gardener-apiserver-56cc665667-nvrjl           1/1       Running   0          6m
 gardener-controller-manager-5c9f8db55-hfcts   1/1       Running   0          6m
 ```
 
-## Step 8: Register Garden Cluster as Seed Cluster
+### Step 8: Register Garden Cluster as Seed Cluster
 
 In heterogeneous productive environments one would run Gardener and seed in
 separate clusters but for simplicity and resource consumption
@@ -245,7 +185,7 @@ and matches the region that you are using. Keep in mind that image ids differ
 between regions as well.
 
 ```
-root@2e8e080d2f34:/landscape/setup/components# ./deploy.sh seed-config
+./deploy.sh seed-config
 ```
 
 That's it! If everything went fine you should now be able to create shoot clusters.
@@ -254,19 +194,19 @@ You can start with a sample
 and create a shoot cluster by standard Kubernetes means:
 
 ```
-root@2e8e080d2f34:/landscape/setup/components# kubectl apply -f shoot-aws.yaml
+kubectl apply -f shoot-aws.yaml
 ```
 
-## Step 9: Install Identity and Dashboard
+### Step 9: Install Identity and Dashboard
 
 Creating clusters based on a shoot manifest is quite nice but also a little
 complex. While almost all aspects of a shoot cluster can be configured it can
 be quite difficult for beginners, so go on and install the dashboard:
 
 ```
-root@c41327633d6d:/landscape/setup/components# ./deploy.sh identity
+./deploy.sh identity
 [...]
-root@c41327633d6d:/landscape/setup/components# ./deploy.sh dashboard
+./deploy.sh dashboard
 [...]
 ```
 
@@ -280,7 +220,14 @@ https://dashboard.ingress.<clusters.dns.domainname from landsacpe.yaml>
 Before opening the dashboard you need to open the `identity.ingress` page
 and ignore the untrusted self-signed certificate, otherwise you won't be allowed in.
 
-## Step 10: Apply Valid Certificates
+
+## Step 10: Apply Valid Certificates (optional)
+
+Ensure that you are in the components directory for installing the certmanager:
+
+```
+cd /landscape/setup/components
+```
 
 Using the Gardener Dashboard with self-signed certificates is awkward and
 some browsers even prevent you from accessing it altogether.
@@ -290,41 +237,31 @@ The following command will install the
 letsencrypt certificates for both the identity and dashboard ingresses:
 
 ```
-root@49693b61f393:/landscape/setup/components# ./deploy.sh certmanager
+./deploy.sh certmanager
 ```
 
 After one to two minutes valid certificates should be installed.
 
-In addition, a change is necessary to the API server daemon set as the
-JWT tokens can now be verified with a different default certificate. Run
-the following command:
-
-```
-kubectl -n kube-system edit daemonset kube-apiserver
-```
-
-and remove the following line from the API server command line options:
-
-```
-- --oidc-ca-file=/etc/kubernetes/secrets/ca.crt
-```
-
 # Tearing Down the Landscape
 
-Make sure that you delete all shoot clusters (HOW ??) prior to tearing down the
-cluster created by Kubify. `kubectl get shoots` should not return any
-shoot clusters:
+Make sure that you delete all shoot clusters prior to tearing down the
+cluster created by Kubify (either by deleting them in the Gardener dashboard 
+or by using the kubectl command). The following command should 
+not return any shoot clusters:
 
 ```
-root@c41327633d6d:/landscape/setup/components# kubectl get shoots --all-namespaces
+kubectl get shoots --all-namespaces
 No resources found.
 ```
+
+There is a [delete-shoot](https://github.com/gardener/gardener/blob/master/hack/delete-shoot)
+script in order to delete shoot clusters.
 
 Next run terraform in order to delete the cluster:
 
 ```
-root@c41327633d6d:/landscape/setup/components# cd landscape
-root@c41327633d6d:/landscape# k8s/bin/tf destroy
+cd /landscape
+k8s/bin/tf destroy
 [...]
 Plan: 0 to add, 0 to change, 170 to destroy.
 
