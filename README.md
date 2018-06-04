@@ -214,7 +214,7 @@ Now you should be able to open the "Gardener" dashboard and start creating
 shoot clusters. The URL will be composed as follows:
 
 ```
-https://dashboard.ingress.<clusters.dns.domainname from landsacpe.yaml>
+https://dashboard.ingress.<clusters.dns.domainname from landscape.yaml>
 ```
 
 Before opening the dashboard you need to open the `identity.ingress` page
