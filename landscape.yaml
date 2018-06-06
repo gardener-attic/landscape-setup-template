@@ -152,7 +152,7 @@ charts:
 - name: gardener
   repository: https://github.com/gardener/gardener
   path: charts/gardener
-  tag: 0.4.0
+  tag: 0.5.1
   # This is the DH value for the VPN. You can generate a new one using this
   # command: "openssl dhparam -out dh2048.pem 2048"
   openVPNDiffieHellmanKey: |
@@ -185,7 +185,7 @@ charts:
 - name: dashboard
   repository: https://github.com/gardener/dashboard
   path: charts/gardener-dashboard
-  tag: 1.10.0
+  tag: 1.12.0
 - name: identity
   repository: https://github.com/gardener/dashboard
   path: charts/identity
