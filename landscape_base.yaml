@@ -12,40 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This file contains parameters for setting up a minimal Gardener
-# environment. Follow the instructions in the file to configure an
-# installation
-
 # Note: the purpose of this project is to provide a simple setup of the
 #       Gardener environment. It is not meant for productive environments
 
+# This is the base file for a spiff merge. 
+# It contains spiff merge tags that will be replaced by values 
+# from the landscape_config.yaml file, as well as technical configuration, 
+# that is assumed to be independent of the user configuration.
+
+# Only touch this if you know what you are doing.
 
 cloud:
   # currently only AWS and Openstack are supported, other cloud providers will follow
   # for this setup (Azure, GCP, ...)
   # Use lower case!
-  variant: <cloud variant>
+  variant: (( merge ))
 
 authentication:
   # for gardener installation on AWS
   variant_aws:
     # You need an AWS access key which has sufficient permissions to create a
     # VPC, subnets, routing tables, VMs, etc.
-    aws_access_key: &aws_access_key "<access key>"
-    aws_secret_key: &aws_secret_key "<secret key>"
+    aws_access_key: "(( merge ))"
+    aws_secret_key: "(( merge ))"
     # AWS region where the Kubify cluster will be created
-    aws_region: eu-west-1
+    aws_region: (( merge ))
     # Availability zone for the Kubify cluster
-    aws_availability_zone: b
+    aws_availability_zone: (( merge ))
   # for gardener installation on OpenStack
   variant_openstack:
-    os_user_name: "<openstack username>"
-    os_password: "<openstack password>"
-    os_auth_url: "<openstack v3 api endpoint>"
-    os_tenant_name: "<tenant/project name>"
-    os_domain_name: "<domain name>"
-    os_region: "<region name>"
-    os_az: "<availability zone>"
+    os_user_name: "(( merge ))"
+    os_password: "(( merge ))"
+    os_auth_url: "(( merge ))"
+    os_tenant_name: "(( merge ))"
+    os_domain_name: "(( merge ))"
+    os_region: "(( merge ))"
+    os_az: "(( merge ))"
 
 # ---------------------------------------------------------------------------
 # Settings required for Kubernetes cluster setup with Kubify
@@ -64,26 +66,26 @@ versions:
 
 clusters:
   # name of the cluster
-  name: "<cluster name>"
+  name: "(( merge ))"
   type: eval
   dns:
     # domain name for cluster created by Kubify
-    domain_name: "<full domain name for cluster>"
+    domain_name: "(( merge ))"
     # DNS provider (currently only route53 supported by these setup scripts)
     dns_type: route53
     # hosted zone for domain names and credentials (possibly the same ones
     # as above)
-    hosted_zone_id: &hzone "<hosted zone id>"
-    access_key: &hzone_access_key "<access key for hosted zone>"
-    secret_key: &hzone_secret_key "<secret key for hosted zone>"
+    hosted_zone_id: "(( merge ))"
+    access_key: "(( merge ))"
+    secret_key: "(( merge ))"
   master:
     # Properties for master nodes.
-    count: 3
-    volume_size: 50
+    count: (( merge ))
+    volume_size: (( merge ))
   worker:
     # Properties for worker nodes
-    count: 3
-    volume_size: 50
+    count: (( merge ))
+    volume_size: (( merge ))
 
 etcd_backup:
   storage_type: s3
@@ -103,7 +105,7 @@ misc:
   variant_all:
     # use htpasswd to create password entries
     # example here: admin: ********* (htpasswd -bn admin "chosen password")
-    dashboard_creds: "<credentials here>"
+    dashboard_creds: "(( merge ))"
     # you should not change anything in this section below except for the
     # password
     deploy_tiller: "false"
@@ -140,7 +142,7 @@ misc:
               ]
         }
   variant_openstack:
-    os_fip_pool_name: "<floating ip pool name>"
+    os_fip_pool_name: "(( merge ))"
     os_lbaas_provider: "haproxy"
     event_ttl: 730h0m0s
 
@@ -169,19 +171,19 @@ charts:
       internalDomain:
         # the cluster internal domain, this should be set to
         # "internal." + clusters.dns.domain_name
-        domain: "<internal domain>"
+        domain: "(( merge ))"
         provider: aws-route53
-        hostedZoneID: *hzone
-        access_key: *hzone_access_key
-        secret_key: *hzone_secret_key
+        hostedZoneID: (( clusters.dns.hosted_zone_id ))
+        access_key: (( clusters.dns.access_key ))
+        secret_key: (( clusters.dns.secret_key ))
       defaultDomains:
         # the cluster internal domain, this should be set to
         # "shoot." + clusters.dns.domain_name
-      - domain: "<shoot domain>"
+      - domain: "(( merge ))"
         provider: aws-route53
-        hostedZoneID: *hzone
-        access_key: *hzone_access_key
-        secret_key: *hzone_secret_key
+        hostedZoneID: (( clusters.dns.hosted_zone_id ))
+        access_key: (( clusters.dns.access_key ))
+        secret_key: (( clusters.dns.secret_key ))
 - name: dashboard
   repository: https://github.com/gardener/dashboard
   path: charts/gardener-dashboard
@@ -190,63 +192,33 @@ charts:
   repository: https://github.com/gardener/dashboard
   path: charts/identity
   tag: v2.10.0
-  values:
-  # You need to set at least one password here to be able to
-  # log on. You can either provide the password in clear text
-  # in the "password" key or provide bcrypted passsword in
-  # the "hash" key. Bcrypted password can be created with
-  # htpasswd -bnBC 10 "" password | tr -d ':\n' | sed 's/$2y/$2a/'
-  staticPasswords:
-  # sample
-  #- email: "dirk@**********"
-  #  password: "***************"
-  #  username: "admin"
-  #  userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
-  connectors:
-  # Example for a GitHub connector below
-  # You will need to configure your GitHub account accordingly
-  # see https://github.com/coreos/dex/blob/master/Documentation/connectors/github.md for further information on the GitHub connector
-  # and https://github.com/coreos/dex/tree/master/Documentation/connectors for more connectors
-#  - type: github
-#    id: github
-#    name: GitHub
-#    config:
-#      clientID: <github client id or environment variable containing it>
-#      clientSecret: <github client secret or environment variable containing it>
-      # redirectURI: <identity URL (with https!)>/callback
-      # identity is usually located at identity.ingress. + clusters.dns.domain_name
-#      redirectURI: <redirect URI>
-      # Only users which are members of at least one organization can authenticate
-#      orgs:
-#      - name: <name of github organization>
+  values: (( merge ))
+  staticPasswords: (( merge ))
+  connectors: (( merge ))
 - name: certmanager
   # Email address used for ACME registration
-  email: "<email address>"
+  email: "(( merge ))"
 
 seed_config:
   variant_aws:
     # The cluster created by Kubify is registered as the seed cluster,
     # use the same region here as in the authentication node above
-    region: "eu-west-1"
+    region: "(( merge ))"
     # This is a Container Linux image.
     # Note that ami ids differ between regions
-    image: "ami-34237c4d"
+    image: "(( merge ))"
     zones:
-    - eu-west-1a
-    - eu-west-1b
-    - eu-west-1c
+    <<: (( merge ))
   variant_openstack:
     # The cluster created by Kubify is registered as the seed cluster,
     # use the same region here as in the authentication node above
-    region: "<region name>"
+    region: "(( merge ))"
     # This is a Container Linux image.
     # The available images depend on your openstack setup
-    image: "<image name>"
+    image: "(( merge ))"
     # zones need to be adapted to the region
     zones:
-    - <zone1>
-    - <zone2>
-    - <...>
+    <<: (( merge ))
   variant_all:
     node_cidr: *subnet_cidr
     pod_cidr: *pod_cidr

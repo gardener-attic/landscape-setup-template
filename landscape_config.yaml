@@ -1,0 +1,156 @@
+# Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This file contains parameters for setting up a minimal Gardener
+# environment. Follow the instructions in the file to configure an
+# installation
+
+# Note: the purpose of this project is to provide a simple setup of the
+#       Gardener environment. It is not meant for productive environments
+
+# ---------------------------------------------------------------------------
+# Cloud Provider
+# ---------------------------------------------------------------------------
+cloud:
+  # currently only AWS and Openstack are supported, other cloud providers will follow
+  # for this setup (Azure, GCP, ...)
+  # Use lower case!
+  variant: <cloud variant>
+  # Whenever there are "variant_XXX" nodes below, with XXX being a cloud provider,
+  # you only need to fill in the values for the provider chosen here.
+
+authentication:
+  variant_aws:
+    # You need an AWS access key which has sufficient permissions to create a
+    # VPC, subnets, routing tables, VMs, etc.
+    aws_access_key: "<access key>"
+    aws_secret_key: "<secret key>"
+    # AWS region where the Kubify cluster will be created
+    aws_region: &aws_region eu-west-1
+    # Availability zone for the Kubify cluster
+    aws_availability_zone: b
+  variant_openstack:
+    os_user_name: "<openstack username>"
+    os_password: "<openstack password>"
+    os_auth_url: "<openstack v3 api endpoint>"
+    os_tenant_name: "<tenant/project name>"
+    os_domain_name: "<domain name>"
+    os_region: &os_region "<region name>"
+    os_az: "<availability zone>"
+
+# ---------------------------------------------------------------------------
+# Settings required for Kubernetes cluster setup with Kubify
+# ---------------------------------------------------------------------------
+
+clusters:
+  # name of the cluster
+  name: "<cluster name>"
+  dns:
+    # domain name for cluster created by Kubify
+    domain_name: "<full domain name for cluster>"
+    # DNS provider (currently only route53 supported by these setup scripts)
+    # hosted zone for domain names and credentials (possibly the same ones
+    # as above)
+    hosted_zone_id: "<hosted zone id>"
+    access_key: "<access key for hosted zone>"
+    secret_key: "<secret key for hosted zone>"
+  master:
+    # Properties for master nodes.
+    count: 3
+    volume_size: 50
+  worker:
+    # Properties for worker nodes
+    count: 3
+    volume_size: 50
+
+misc:
+  variant_all:
+    # use htpasswd to create password entries
+    # example here: admin: ********* (htpasswd -bn admin "chosen password")
+    dashboard_creds: "<credentials here>"
+  variant_openstack:
+    os_fip_pool_name: "<floating ip pool name>"
+
+# ---------------------------------------------------------------------------
+# Helm charts for gardener, dasboard, and identity deployments
+# ---------------------------------------------------------------------------
+
+charts:
+- name: gardener
+- name: identity
+  # identity is the identity provider for the dashboard
+  # this addon specifies who can login into the dashboard and how
+  # there are basically two options:
+  # - you specify accounts in this file: see "staticPasswords"
+  # - you use a dex connector to use OAuth authentication for the dashboard: see "connectors"
+  # You need at least one entry in one of the categories, otherwise the dashboard won't be accessible!
+  values:
+  # You can either provide the password in clear text
+  # in the "password" key or provide bcrypted passsword in
+  # the "hash" key. Bcrypted password can be created with
+  # htpasswd -bnBC 10 "" password | tr -d ':\n' | sed 's/$2y/$2a/'
+  staticPasswords:
+  # example 
+  - email: <email address>
+    hash: <bcrypted password>
+    username: <username>
+    userID: <UUID>
+  connectors:
+  # Example for a GitHub connector below
+  # You will need to configure your GitHub account accordingly
+  # see https://github.com/coreos/dex/blob/master/Documentation/connectors/github.md for further information on the GitHub connector
+  # and https://github.com/coreos/dex/tree/master/Documentation/connectors for more connectors
+  # uncomment and fill in to add the github connector
+  # (Github needs to be able to access the redirectURI for this to work!)
+#  - type: github
+#    id: github
+#    name: GitHub
+#    config:
+#      clientID: <github client id or environment variable containing it>
+#      clientSecret: <github client secret or environment variable containing it>
+#      # redirectURI: <identity URL (with https!)>/callback
+#      # identity is usually located at identity.ingress. + clusters.dns.domain_name
+#      redirectURI: <redirect URI>
+#      # Only users which are members of at least one organization can authenticate
+#      orgs:
+#      - name: <name of github organization>
+- name: certmanager
+  # Email address used for ACME registration
+  # see https://en.wikipedia.org/wiki/Automated_Certificate_Management_Environment for more information on ACME
+  email: "<email address>"
+
+seed_config:
+  variant_aws:
+    # The cluster created by Kubify is registered as the seed cluster,
+    # this has to match the region from the authentication node above.
+    region: *aws_region
+    # This is a Container Linux image.
+    # Note that ami ids differ between regions
+    image: "ami-34237c4d"
+    zones:
+    - eu-west-1a
+    - eu-west-1b
+    - eu-west-1c
+  variant_openstack:
+    # The cluster created by Kubify is registered as the seed cluster,
+    # this has to match the region from the authentication node above.
+    region: *os_region
+    # This is a Container Linux image.
+    # The available images depend on your openstack setup
+    image: "<image name>"
+    # zones need to be adapted to the region
+    zones:
+    - <zone1>
+    - <zone2>
+    - <...>
