@@ -171,7 +171,7 @@ charts:
       internalDomain:
         # the cluster internal domain, this should be set to
         # "internal." + clusters.dns.domain_name
-        domain: "(( merge ))"
+        domain: (( "internal." clusters.dns.domain_name ))
         provider: aws-route53
         hostedZoneID: (( clusters.dns.hosted_zone_id ))
         access_key: (( clusters.dns.access_key ))
@@ -179,7 +179,7 @@ charts:
       defaultDomains:
         # the cluster internal domain, this should be set to
         # "shoot." + clusters.dns.domain_name
-      - domain: "(( merge ))"
+      - domain: (( "shoot." clusters.dns.domain_name ))
         provider: aws-route53
         hostedZoneID: (( clusters.dns.hosted_zone_id ))
         access_key: (( clusters.dns.access_key ))
