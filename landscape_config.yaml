@@ -74,6 +74,12 @@ clusters:
     count: 3
     volume_size: 50
 
+etcd_backup:
+  storage_type: s3
+  region: eu-west-1
+  # access_key: <access key for s3 bucket>
+  # secret_key: <secret key for s3 bucket>
+
 misc:
   variant_all:
     # use htpasswd to create password entries

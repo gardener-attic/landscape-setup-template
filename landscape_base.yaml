@@ -88,8 +88,7 @@ clusters:
     volume_size: (( merge ))
 
 etcd_backup:
-  storage_type: s3
-  region: eu-west-1
+  <<: (( merge ))
 
 # for futher add-ons check the Kubify documentation
 addons:
