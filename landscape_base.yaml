@@ -1,0 +1,224 @@
+# Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Note: the purpose of this project is to provide a simple setup of the
+#       Gardener environment. It is not meant for productive environments
+
+# This is the base file for a spiff merge. 
+# It contains spiff merge tags that will be replaced by values 
+# from the landscape_config.yaml file, as well as technical configuration, 
+# that is assumed to be independent of the user configuration.
+
+# Only touch this if you know what you are doing.
+
+cloud:
+  # currently only AWS and Openstack are supported, other cloud providers will follow
+  # for this setup (Azure, GCP, ...)
+  # Use lower case!
+  variant: (( merge ))
+
+authentication:
+  # for gardener installation on AWS
+  variant_aws:
+    # You need an AWS access key which has sufficient permissions to create a
+    # VPC, subnets, routing tables, VMs, etc.
+    aws_access_key: "(( merge ))"
+    aws_secret_key: "(( merge ))"
+    # AWS region where the Kubify cluster will be created
+    aws_region: (( merge ))
+    # Availability zone for the Kubify cluster
+    aws_availability_zone: (( merge ))
+  # for gardener installation on OpenStack
+  variant_openstack:
+    os_user_name: "(( merge ))"
+    os_password: "(( merge ))"
+    os_auth_url: "(( merge ))"
+    os_tenant_name: "(( merge ))"
+    os_domain_name: "(( merge ))"
+    os_region: "(( merge ))"
+    os_az: "(( merge ))"
+
+# ---------------------------------------------------------------------------
+# Settings required for Kubernetes cluster setup with Kubify
+# ---------------------------------------------------------------------------
+
+# You should leave the following parameters untouched unless you are planning
+# to use newer versions
+versions:
+  variant_all:
+    kubernetes_version: v1.9.6
+  variant_aws:
+    etcd_version: v3.1.8
+    image_name: "CoreOS-stable-1576.5.0"
+  variant_openstack:
+    image_name: "coreos-1688.5.3"
+
+clusters:
+  # name of the cluster
+  name: "(( merge ))"
+  type: eval
+  dns:
+    # domain name for cluster created by Kubify
+    domain_name: "(( merge ))"
+    # DNS provider (currently only route53 supported by these setup scripts)
+    dns_type: route53
+    # hosted zone for domain names and credentials (possibly the same ones
+    # as above)
+    hosted_zone_id: "(( merge ))"
+    access_key: "(( merge ))"
+    secret_key: "(( merge ))"
+  master:
+    # Properties for master nodes.
+    count: (( merge ))
+    volume_size: (( merge ))
+  worker:
+    # Properties for worker nodes
+    count: (( merge ))
+    volume_size: (( merge ))
+
+etcd_backup:
+  <<: (( merge ))
+
+# for futher add-ons check the Kubify documentation
+addons:
+  variant_all:
+    heapster: {}
+    nginx-ingress: {}
+    dashboard:
+      app_name: "kubernetes-dashboard"
+  variant_aws:
+  variant_openstack:
+
+misc:
+  variant_all:
+    # use htpasswd to create password entries
+    # example here: admin: ********* (htpasswd -bn admin "chosen password")
+    dashboard_creds: "(( merge ))"
+    # you should not change anything in this section below except for the
+    # password
+    deploy_tiller: "false"
+    oidc_issuer_subdomain: "identity.ingress"
+    oidc_client_id: "kube-kubectl"
+    oidc_username_claim: "email"
+    oidc_groups_claim: "groups"
+    oidc_ca_file: "/etc/kubernetes/secrets/ca.crt"
+    subnet_cidr: &subnet_cidr "10.251.128.0/17"
+    service_cidr: &service_cidr "10.241.0.0/17"
+    pod_cidr: &pod_cidr "10.241.128.0/17"
+    vpc_cidr: "10.251.0.0/16"
+  variant_aws:
+    aws_kube2iam_roles:
+    - name: example
+      description: "Allow access to ECR repositories beginning with 'example/', and creation of new repositories"
+      policy: |
+        {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "ecr:*",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:ecr:eu-west-1:${account_id}:repository/example/*"
+                },
+                {
+                  "Action": [
+                    "ecr:GetAuthorizationToken",
+                    "ecr:CreateRepository"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "*"
+                }
+              ]
+        }
+  variant_openstack:
+    os_fip_pool_name: "(( merge ))"
+    os_lbaas_provider: "haproxy"
+    event_ttl: 730h0m0s
+
+# ---------------------------------------------------------------------------
+# Helm charts for gardener, dasboard, and identity deployments
+# ---------------------------------------------------------------------------
+
+charts:
+- name: gardener
+  repository: https://github.com/gardener/gardener
+  path: charts/gardener
+  tag: 0.5.1
+  # This is the DH value for the VPN. You can generate a new one using this
+  # command: "openssl dhparam -out dh2048.pem 2048"
+  openVPNDiffieHellmanKey: |
+    -----BEGIN DH PARAMETERS-----
+    MIIBCAKCAQEAuuD7hZeeAUzs+bWFcdS6fM/F8xOyLn1vrNQ+I/zoLh8maehADhHr
+    yJsW0nF3mgDFYx18/6sqd3jKrwW+O6Gg48X/AzEm2O1TBnMgH+CgZ/C5HzouWUtu
+    UiUnqy0GaFv7oxbeQBv0Y5mP7k7ey5nuIhuRXJkH1j3PKopWD52AOE620ndLsZuz
+    DxszvaCZLo85qb6lm75+XSL2i3gXaw1Dv78ogdrOrggwqAUM6OG7d1B4eTC7aGj+
+    I32AbPZ8+IIZCDUKL+bqXIg2TieT+sDMUQSJPlAcur+UmNf5Sss67NM0d/uclaOU
+    OEdYnniH3kneQZH/zy0hwiRES9W2Ws3RkwIBAg==
+    -----END DH PARAMETERS-----
+  values:
+    controller:
+      internalDomain:
+        # the cluster internal domain, this should be set to
+        # "internal." + clusters.dns.domain_name
+        domain: (( "internal." clusters.dns.domain_name ))
+        provider: aws-route53
+        hostedZoneID: (( clusters.dns.hosted_zone_id ))
+        access_key: (( clusters.dns.access_key ))
+        secret_key: (( clusters.dns.secret_key ))
+      defaultDomains:
+        # the cluster internal domain, this should be set to
+        # "shoot." + clusters.dns.domain_name
+      - domain: (( "shoot." clusters.dns.domain_name ))
+        provider: aws-route53
+        hostedZoneID: (( clusters.dns.hosted_zone_id ))
+        access_key: (( clusters.dns.access_key ))
+        secret_key: (( clusters.dns.secret_key ))
+- name: dashboard
+  repository: https://github.com/gardener/dashboard
+  path: charts/gardener-dashboard
+  tag: 1.12.0
+- name: identity
+  repository: https://github.com/gardener/dashboard
+  path: charts/identity
+  tag: v2.10.0
+  values: (( merge ))
+  staticPasswords: (( merge ))
+  connectors: (( merge ))
+- name: certmanager
+  # Email address used for ACME registration
+  email: "(( merge ))"
+
+seed_config:
+  variant_aws:
+    # The cluster created by Kubify is registered as the seed cluster,
+    # use the same region here as in the authentication node above
+    region: "(( merge ))"
+    # This is a Container Linux image.
+    # Note that ami ids differ between regions
+    image: "(( merge ))"
+    zones:
+    <<: (( merge ))
+  variant_openstack:
+    # The cluster created by Kubify is registered as the seed cluster,
+    # use the same region here as in the authentication node above
+    region: "(( merge ))"
+    # This is a Container Linux image.
+    # The available images depend on your openstack setup
+    image: "(( merge ))"
+    # zones need to be adapted to the region
+    zones:
+    <<: (( merge ))
+  variant_all:
+    node_cidr: *subnet_cidr
+    pod_cidr: *pod_cidr
+    service_cidr: *service_cidr
