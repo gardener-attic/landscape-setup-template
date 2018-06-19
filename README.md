@@ -32,6 +32,33 @@ git client and the Docker runtime installed.
 Follow these steps to install Gardener. Do not proceed to the next
 step in case of errors.
 
+
+## TLDR
+If you are already familiar with the installation procedure and just want a short 
+summary of the commands you have to use, here it is:
+
+```
+# setup
+git clone  --recursive https://github.com/gardener/landscape-setup-template.git landscape
+cd landscape/setup
+./docker_run.sh
+./deploy_kubify.sh
+./deploy_gardener.sh
+
+# optional: certmanager
+cd components
+./deploy.sh certmanager
+
+# -------------------------------------------------------------------
+
+# teardown
+cd /landscape
+k8s/bin/tf destroy -force
+k8s/bin/tf cleanup
+rm -rf variant terraform.tfvars terraform state landscape.yaml export .helm
+```
+
+
 ## Step 1: Clone the Repositories and get Dependencies
 
 Get the `landscape-setup-template` from GitHub and initialize the
@@ -49,20 +76,17 @@ origin so you do not accidentally publish your secrets to the public template re
 
 ## Step 2: Configure the Landscape
 
-There is a `landscape.yaml` file in the landscape project. This is the only
+There is a `landscape_config.yaml` file in the landscape project. This is the only
 file that you need to modify - all other configuration files will be
-derived from this one. Make sure to follow the instructions in the landscape
-file.
+derived from this and the `landscape_base.yaml` file. The latter one contains the merging instructions
+as well as technical configurations and it shouldn't be touched unless you know what you are doing. 
 
 ## Step 3: Build and Run Docker Container
 
-First, you need to change into the setup folder with `cd setup`
-
+First, you need to change into the setup folder:
 ```
-./docker_build.sh
+cd setup
 ```
-
-This script will build the container and name the image `gardener_landscape`. 
 
 Then run the container:
 
@@ -78,6 +102,19 @@ After this,
 * `setup/init.sh` is sourced, meaning
   * the environment variables will be set
   * kubectl will be configured to communicate with your cluster
+
+The `docker_run.sh` script searches for the image locally and pulls it from an image repository, if it isn't found. 
+If pulling the image doesn't work - which will probably be the case if the version in the `setup/VERSION` file 
+doesn't match a release version of the setup submodule - you can use the `docker_build.sh` script to build the image locally. 
+
+Most of the scripts need a `landscape.yaml` file, that can be generated from a merge of `landscape_base.yaml` and `landscape_config.yaml`. 
+The `init.sh` script (which is sourced in the `docker_run.sh` script, see above) 
+will do that automatically, if it doesn't already exist. 
+In case you want to overwrite an existing `landscape.yaml` file or generate it manually, you can use this script:
+
+```
+./build_landscape_yaml.sh
+```
 
 ## Step 4: Create a Kubernetes Cluster via Kubify
 
@@ -112,7 +149,27 @@ the instructions below for manually running them.
 ./deploy_gardener.sh
 ```
 
-After successful completion go to step 10 (optional).
+After successful completion, you can either continue with [step 10 (optional)](#step10), or start using 
+the Gardener (see *[Accessing the Dashboard](#access_dashboard)*).
+
+
+## <a name="access_dashboard"></a>Accessing the Dashboard
+
+After step 9 you will be able to access the Gardener dashboard. This example assumes that 
+your cluster is located at `mycluster.example.org` - just replace that part with 
+whatever you put in the `clusters.dns.domain_name` entry in the `landscape_config.yaml` file.
+
+First, open `https://identity.ingress.mycluster.example.org`. Your browser will show a warning 
+regarding untrusted self-signed certificates, you need to ignore that warning. 
+You will then see a nearly blank page with some 404 message. 
+If you skip this step, you will still be able to see the dashboard in the next step, 
+but the login button probably won't work. 
+
+Now you can open the dashboard at `https://dashboard.ingress.mycluster.example.org`. Here you 
+need to ignore a similar warning again, then you should see the dashboard. You can login 
+using the options you have specified in the identity chart part of the `landscape_config.yaml`.
+
+
 
 ## Step 5-9: Gardener Setup (Manual)
 
@@ -211,14 +268,7 @@ be quite difficult for beginners, so go on and install the dashboard:
 ```
 
 Now you should be able to open the "Gardener" dashboard and start creating
-shoot clusters. The URL will be composed as follows:
-
-```
-https://dashboard.ingress.<clusters.dns.domainname from landscape.yaml>
-```
-
-Before opening the dashboard you need to open the `identity.ingress` page
-and ignore the untrusted self-signed certificate, otherwise you won't be allowed in.
+shoot clusters. 
 
 
 ## Step 10: Apply Valid Certificates (optional)
@@ -273,6 +323,25 @@ Do you really want to destroy?
 ```
 
 Enter `yes` when you are sure that you want to delete the cluster.
+
+
+# Cleanup
+
+If you have created and destroyed a cluster and want to restart it, there are some files you 
+have to delete to clean up the directory. 
+
+**ATTENTION: Only do this if you are sure the cluster has been completely destroyed!**
+Since this removes the terraform state, an automated deletion of resources won't be possible anymore - 
+you will have to clean up any leftovers manually.
+
+```
+cd /landscape
+k8s/bin/tf cleanup
+rm -rf variant terraform.tfvars terraform state landscape.yaml export .helm
+```
+
+This will reset your landscape folder to its initial state.
+
 
 # Current State and Outlook
 
