@@ -22,6 +22,9 @@
 
 # Only touch this if you know what you are doing.
 
+# ---------------------------------------------------------------------------
+# Cloud Provider
+# ---------------------------------------------------------------------------
 cloud:
   # currently only AWS and Openstack are supported, other cloud providers will follow
   # for this setup (Azure, GCP, ...)
@@ -29,25 +32,7 @@ cloud:
   variant: (( merge ))
 
 authentication:
-  # for gardener installation on AWS
-  variant_aws:
-    # You need an AWS access key which has sufficient permissions to create a
-    # VPC, subnets, routing tables, VMs, etc.
-    aws_access_key: "(( merge ))"
-    aws_secret_key: "(( merge ))"
-    # AWS region where the Kubify cluster will be created
-    aws_region: (( merge ))
-    # Availability zone for the Kubify cluster
-    aws_availability_zone: (( merge ))
-  # for gardener installation on OpenStack
-  variant_openstack:
-    os_user_name: "(( merge ))"
-    os_password: "(( merge ))"
-    os_auth_url: "(( merge ))"
-    os_tenant_name: "(( merge ))"
-    os_domain_name: "(( merge ))"
-    os_region: "(( merge ))"
-    os_az: "(( merge ))"
+  <<: (( merge ))
 
 # ---------------------------------------------------------------------------
 # Settings required for Kubernetes cluster setup with Kubify
@@ -80,12 +65,10 @@ clusters:
     secret_key: "(( merge ))"
   master:
     # Properties for master nodes.
-    count: (( merge ))
-    volume_size: (( merge ))
+    <<: (( merge ))
   worker:
     # Properties for worker nodes
-    count: (( merge ))
-    volume_size: (( merge ))
+    <<: (( merge ))
 
 etcd_backup:
   <<: (( merge ))
@@ -199,25 +182,7 @@ charts:
   email: "(( merge ))"
 
 seed_config:
-  variant_aws:
-    # The cluster created by Kubify is registered as the seed cluster,
-    # use the same region here as in the authentication node above
-    region: "(( merge ))"
-    # This is a Container Linux image.
-    # Note that ami ids differ between regions
-    image: "(( merge ))"
-    zones:
-    <<: (( merge ))
-  variant_openstack:
-    # The cluster created by Kubify is registered as the seed cluster,
-    # use the same region here as in the authentication node above
-    region: "(( merge ))"
-    # This is a Container Linux image.
-    # The available images depend on your openstack setup
-    image: "(( merge ))"
-    # zones need to be adapted to the region
-    zones:
-    <<: (( merge ))
+  <<: (( merge ))
   variant_all:
     node_cidr: *subnet_cidr
     pod_cidr: *pod_cidr
