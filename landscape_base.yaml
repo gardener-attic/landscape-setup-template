@@ -42,9 +42,9 @@ authentication:
 # to use newer versions
 versions:
   variant_all:
-    kubernetes_version: v1.9.6
+    kubernetes_version: v1.9.11
   variant_aws:
-    etcd_version: v3.1.8
+    #etcd_version: v3.3.10
     image_name: "CoreOS-stable-1576.5.0"
   variant_openstack:
     image_name: "coreos-1688.5.3"
@@ -53,6 +53,7 @@ clusters:
   # name of the cluster
   name: "(( merge ))"
   type: eval
+  base_cluster: (( merge ))
   dns:
     # domain name for cluster created by Kubify
     domain_name: "(( merge ))"
@@ -70,13 +71,20 @@ clusters:
     # Properties for worker nodes
     <<: (( merge ))
 
+etcd:
+  # namespace to use for etcd deployment (only relevant if etcd component is deployed)
+  namespace: etcd
+  # address of the etcd server to use (HOST:PORT)
+  server:
+    kubify: "https://10.241.0.15:2379"
+    custom: (( "etcd." etcd.namespace ".svc.cluster.local:2379" ))
+
 etcd_backup:
   <<: (( merge ))
 
 # for futher add-ons check the Kubify documentation
 addons:
   variant_all:
-    heapster: {}
     nginx-ingress: {}
     dashboard:
       app_name: "kubernetes-dashboard"
@@ -95,38 +103,15 @@ misc:
     oidc_client_id: "kube-kubectl"
     oidc_username_claim: "email"
     oidc_groups_claim: "groups"
-    oidc_ca_file: "/etc/kubernetes/secrets/ca.crt"
     subnet_cidr: &subnet_cidr "10.251.128.0/17"
     service_cidr: &service_cidr "10.241.0.0/17"
     pod_cidr: &pod_cidr "10.241.128.0/17"
     vpc_cidr: "10.251.0.0/16"
   variant_aws:
-    aws_kube2iam_roles:
-    - name: example
-      description: "Allow access to ECR repositories beginning with 'example/', and creation of new repositories"
-      policy: |
-        {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "ecr:*",
-                  "Effect": "Allow",
-                  "Resource": "arn:aws:ecr:eu-west-1:${account_id}:repository/example/*"
-                },
-                {
-                  "Action": [
-                    "ecr:GetAuthorizationToken",
-                    "ecr:CreateRepository"
-                  ],
-                  "Effect": "Allow",
-                  "Resource": "*"
-                }
-              ]
-        }
   variant_openstack:
     os_fip_pool_name: "(( merge ))"
     os_lbaas_provider: "haproxy"
-    event_ttl: 730h0m0s
+    event_ttl: 168h0m0s
 
 # ---------------------------------------------------------------------------
 # Helm charts for gardener, dasboard, and identity deployments
@@ -137,6 +122,7 @@ charts:
   repository: https://github.com/gardener/gardener
   path: charts/gardener
   tag: 0.12.4
+  managed: true
   # This is the DH value for the VPN. You can generate a new one using this
   # command: "openssl dhparam -out dh2048.pem 2048"
   openVPNDiffieHellmanKey: |
@@ -170,6 +156,7 @@ charts:
   repository: https://github.com/gardener/dashboard
   path: charts/gardener-dashboard
   tag: 1.22.0
+  managed: true
 - name: identity
   repository: https://github.com/gardener/dashboard
   path: charts/identity
@@ -178,8 +165,10 @@ charts:
   staticPasswords: (( merge ))
   connectors: (( merge ))
 - name: certmanager
+  version: v0.4.1 # version given to the helm chart
   # Email address used for ACME registration
   email: "(( merge ))"
+  live: "(( merge ))"
 
 seed_config:
   <<: (( merge ))
