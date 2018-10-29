@@ -70,6 +70,9 @@ clusters:
     # Properties for worker nodes
     <<: (( merge ))
 
+etcd:
+  <<: (( merge ))
+
 etcd_backup:
   <<: (( merge ))
 
@@ -95,7 +98,6 @@ misc:
     oidc_client_id: "kube-kubectl"
     oidc_username_claim: "email"
     oidc_groups_claim: "groups"
-    oidc_ca_file: "/etc/kubernetes/secrets/ca.crt"
     subnet_cidr: &subnet_cidr "10.251.128.0/17"
     service_cidr: &service_cidr "10.241.0.0/17"
     pod_cidr: &pod_cidr "10.241.128.0/17"
@@ -178,8 +180,10 @@ charts:
   staticPasswords: (( merge ))
   connectors: (( merge ))
 - name: certmanager
+  version: v0.4.1 # version given to the helm chart
   # Email address used for ACME registration
   email: "(( merge ))"
+  live: "(( merge ))"
 
 seed_config:
   <<: (( merge ))
