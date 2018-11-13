@@ -53,10 +53,10 @@ authentication:
     # This project does NOT support Gardener on Azure yet!
     # This information is only needed for the Azure seed configuration
     # (necessary if you want to create shoots on Azure)
-    az_tenant_id: <az tenant id>
-    az_subscription_id: <az subscription id>
-    az_client_id: <az client id>
-    az_client_secret: <az client secret>
+    az_tenant_id: "<az tenant id>"
+    az_subscription_id: "<az subscription id>"
+    az_client_id: "<az client id>"
+    az_client_secret: "<az client secret>"
     az_region: &az_region westeurope
     az_cloudenv: public
   variant_gcp:
@@ -64,7 +64,7 @@ authentication:
     # This information is only needed for the GCP seed configuration
     # (necessary if you want to create shoots on GCP)
     gcp_region: &gcp_region europe-west1
-    gcp_serviceaccount_json: <gcp serviceaccount as json>    
+    gcp_serviceaccount_json: "<gcp serviceaccount as json>"    
 
 # ---------------------------------------------------------------------------
 # Settings required for Kubernetes cluster setup
@@ -134,10 +134,10 @@ charts:
   # htpasswd -bnBC 10 "" password | tr -d ':\n' | sed 's/$2y/$2a/'
   staticPasswords:
   # example 
-  - email: <email address>
-    hash: <bcrypted password>
-    username: <username>
-    userID: <UUID>
+  - email: "<email address>"
+    hash: "<bcrypted password>"
+    username: "<username>"
+    userID: "<UUID>"
   connectors:
   # Example for a GitHub connector below
   # You will need to configure your GitHub account accordingly
