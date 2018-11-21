@@ -42,9 +42,9 @@ authentication:
 # to use newer versions
 versions:
   variant_all:
-    kubernetes_version: v1.9.6
+    kubernetes_version: v1.9.11
   variant_aws:
-    etcd_version: v3.1.8
+    #etcd_version: v3.3.10
     image_name: "CoreOS-stable-1576.5.0"
   variant_openstack:
     image_name: "coreos-1688.5.3"
@@ -79,7 +79,6 @@ etcd_backup:
 # for futher add-ons check the Kubify documentation
 addons:
   variant_all:
-    heapster: {}
     nginx-ingress: {}
     dashboard:
       app_name: "kubernetes-dashboard"
@@ -103,32 +102,10 @@ misc:
     pod_cidr: &pod_cidr "10.241.128.0/17"
     vpc_cidr: "10.251.0.0/16"
   variant_aws:
-    aws_kube2iam_roles:
-    - name: example
-      description: "Allow access to ECR repositories beginning with 'example/', and creation of new repositories"
-      policy: |
-        {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "ecr:*",
-                  "Effect": "Allow",
-                  "Resource": "arn:aws:ecr:eu-west-1:${account_id}:repository/example/*"
-                },
-                {
-                  "Action": [
-                    "ecr:GetAuthorizationToken",
-                    "ecr:CreateRepository"
-                  ],
-                  "Effect": "Allow",
-                  "Resource": "*"
-                }
-              ]
-        }
   variant_openstack:
     os_fip_pool_name: "(( merge ))"
     os_lbaas_provider: "haproxy"
-    event_ttl: 730h0m0s
+    event_ttl: 168h0m0s
 
 # ---------------------------------------------------------------------------
 # Helm charts for gardener, dasboard, and identity deployments

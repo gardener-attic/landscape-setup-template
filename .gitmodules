@@ -1,12 +1,6 @@
-[submodule "dashboard"]
-	path = dashboard
-	url = https://github.com/gardener/dashboard
 [submodule "kubify"]
 	path = k8s
 	url = https://github.com/gardener/kubify
 [submodule "setup"]
 	path = setup
 	url = https://github.com/gardener/landscape-setup.git
-[submodule "gardener"]
-	path = gardener
-	url = https://github.com/gardener/gardener.git
