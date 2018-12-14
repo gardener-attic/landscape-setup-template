@@ -53,10 +53,10 @@ authentication:
     # This project does NOT support Gardener on Azure yet!
     # This information is only needed for the Azure seed configuration
     # (necessary if you want to create shoots on Azure)
-    az_tenant_id: <az tenant id>
-    az_subscription_id: <az subscription id>
-    az_client_id: <az client id>
-    az_client_secret: <az client secret>
+    az_tenant_id: "<az tenant id>"
+    az_subscription_id: "<az subscription id>"
+    az_client_id: "<az client id>"
+    az_client_secret: "<az client secret>"
     az_region: &az_region westeurope
     az_cloudenv: public
   variant_gcp:
@@ -64,15 +64,23 @@ authentication:
     # This information is only needed for the GCP seed configuration
     # (necessary if you want to create shoots on GCP)
     gcp_region: &gcp_region europe-west1
-    gcp_serviceaccount_json: <gcp serviceaccount as json>    
+    gcp_serviceaccount_json: "<gcp serviceaccount as json>"    
 
 # ---------------------------------------------------------------------------
-# Settings required for Kubernetes cluster setup with Kubify
+# Settings required for Kubernetes cluster setup
 # ---------------------------------------------------------------------------
 
 clusters:
   # name of the cluster
   name: "<cluster name>"
+  # Where the base cluster (the one to install Gardener on) comes from
+  # possible values:
+  # - kubify 
+  #   A base cluster will be created using kubify.
+  # - custom
+  #   Use this, if you get the cluster from anywhere else. 
+  #   Put the kubeconfig into the landscape folder (next to this file).
+  base_cluster: kubify
   dns:
     # domain name for cluster created by Kubify
     domain_name: "<full domain name for cluster>"
@@ -82,18 +90,19 @@ clusters:
     hosted_zone_id: "<hosted zone id>"
     access_key: "<access key for hosted zone>"
     secret_key: "<secret key for hosted zone>"
-  master:
+  master: # kubify only
     # Properties for master nodes.
     count: 3
     volume_size: 50
-  worker:
+  worker: # kubify only
     # Properties for worker nodes
     count: 3
     volume_size: 50
 
-etcd_backup:
+etcd_backup: # kubify only
   storage_type: s3
   region: eu-west-1
+  # If not provided, the route53 credentials will be used.
   # access_key: <access key for s3 bucket>
   # secret_key: <secret key for s3 bucket>
 
@@ -101,7 +110,7 @@ misc:
   variant_all:
     # use htpasswd to create password entries
     # example here: admin: ********* (htpasswd -bn admin "chosen password")
-    dashboard_creds: "<credentials here>"
+    dashboard_creds: "<credentials here>" # kubify only
   variant_openstack:
     os_fip_pool_name: "<floating ip pool name>"
 
@@ -125,10 +134,10 @@ charts:
   # htpasswd -bnBC 10 "" password | tr -d ':\n' | sed 's/$2y/$2a/'
   staticPasswords:
   # example 
-  - email: <email address>
-    hash: <bcrypted password>
-    username: <username>
-    userID: <UUID>
+  - email: "<email address>"
+    hash: "<bcrypted password>"
+    username: "<username>"
+    userID: "<UUID>"
   connectors:
   # Example for a GitHub connector below
   # You will need to configure your GitHub account accordingly
@@ -152,6 +161,10 @@ charts:
   # Email address used for ACME registration
   # see https://en.wikipedia.org/wiki/Automated_Certificate_Management_Environment for more information on ACME
   email: "<email address>"
+  # Whether to use the letsencrypt live server
+  # - only the live server produces trusted certificates
+  # - live server has significantly stricter quotas than staging server
+  live: false
 
 seed_config:
   # all variants which are specified in "seeds" have to be configured in this section!
