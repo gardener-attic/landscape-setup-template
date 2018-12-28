@@ -49,7 +49,7 @@ authentication:
     os_domain_name: "<domain name>"
     os_region: &os_region "<region name>"
     os_az: "<availability zone>"
-  variant_az:
+  variant_azure:
     # This project does NOT support Gardener on Azure yet!
     # This information is only needed for the Azure seed configuration
     # (necessary if you want to create shoots on Azure)
