@@ -193,7 +193,7 @@ seed_config:
     - <zone1>
     - <zone2>
     - <...>
-  variant_az:
+  variant_azure:
     region: *az_region
     # CoreOS stable version number
     image: 1745.7.0
