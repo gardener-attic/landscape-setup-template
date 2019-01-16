@@ -42,12 +42,12 @@ authentication:
 # to use newer versions
 versions:
   variant_all:
-    kubernetes_version: v1.9.11
+    kubernetes_version: v1.10.12 # kubify only
   variant_aws:
     #etcd_version: v3.3.10
-    image_name: "CoreOS-stable-1576.5.0"
+    image_name: "CoreOS-stable-1855.4.0"
   variant_openstack:
-    image_name: "coreos-1688.5.3"
+    #image_name: "coreos-1855.4.0" # kubify only
 
 clusters:
   # name of the cluster
@@ -121,7 +121,7 @@ charts:
 - name: gardener
   repository: https://github.com/gardener/gardener
   path: charts/gardener
-  tag: 0.12.4
+  tag: 0.16.0
   managed: true
   # This is the DH value for the VPN. You can generate a new one using this
   # command: "openssl dhparam -out dh2048.pem 2048"
@@ -155,7 +155,7 @@ charts:
 - name: dashboard
   repository: https://github.com/gardener/dashboard
   path: charts/gardener-dashboard
-  tag: 1.22.0
+  tag: 1.26.0
   managed: true
 - name: identity
   repository: https://github.com/gardener/dashboard

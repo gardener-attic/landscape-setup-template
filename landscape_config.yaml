@@ -178,7 +178,7 @@ seed_config:
     region: *aws_region
     # This is a Container Linux image.
     # Note that ami ids differ between regions
-    image: "ami-34237c4d"
+    image: "ami-030d1bab626c90e46"
     zones:
     - eu-west-1a
     - eu-west-1b
