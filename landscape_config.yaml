@@ -187,7 +187,7 @@ seed_config:
     region: *os_region
     # This is a Container Linux image.
     # The available images depend on your openstack setup
-    image: "<image name>"
+    image: "coreos-1911.5.0"
     # zones need to be adapted to the region
     zones:
     - <zone1>
@@ -196,11 +196,11 @@ seed_config:
   variant_az:
     region: *az_region
     # CoreOS stable version number
-    image: 1745.7.0
+    image: 1911.5.0
     # no zones in azure
   variant_gcp:
     region: *gcp_region 
-    image: "projects/coreos-cloud/global/images/coreos-stable-1745-7-0-v20180614"
+    image: "projects/coreos-cloud/global/images/coreos-stable-1911-5-0-v20181219"
     zones:
     - europe-west1-b
     - europe-west1-c
