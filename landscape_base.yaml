@@ -48,6 +48,8 @@ versions:
     image_name: "CoreOS-stable-1576.5.0"
   variant_openstack:
     image_name: "coreos-1688.5.3"
+  variant_azure:
+    image_name: "coreos-1745.7.0"
 
 clusters:
   # name of the cluster
