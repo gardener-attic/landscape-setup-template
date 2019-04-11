@@ -1,3 +1,10 @@
+# ---DEPRECATED---
+
+**This project is outdated and won't be updated anymore. Please use https://github.com/gardener/garden-setup instead!**
+
+
+
+
 # Project "Gardener" Landscape Setup
 
 Project "Gardener" can be used to set up Kubernetes landscapes with hundreds
